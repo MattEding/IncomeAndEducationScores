@@ -1,12 +1,14 @@
+import csv
 import logging
+import pathlib
 import shutil
-from pathlib import Path
 
+import pkg_resources
 import requests
 from bs4 import BeautifulSoup
 
 
-data_dir = Path.cwd() / 'data'
+data_dir = pathlib.Path(pkg_resources.resource_filename(__package__, 'data'))
 data_dir.mkdir(exist_ok=True)
 
 csv_dir = data_dir / 'csv'
@@ -43,6 +45,45 @@ def unarchive_csv(year):
     zip_file = zip_dir / f'sbac_{year}.zip'
     shutil.unpack_archive(zip_file, csv_dir)
     return
+
+
+def insert_entity(csvfile, connection):
+    insert = '''
+    INSERT INTO entity
+    (
+        school_code
+        , district_code
+        , county_code
+        , school_name
+        , district_name
+        , county_name
+        , test_year
+        , type_id
+        , zip_code
+    )
+    VALUES
+    (
+        :school_code
+        , :district_code
+        , :county_code
+        , :school_name
+        , :district_name
+        , :county_name
+        , :test_year
+        , :type_id
+        , :zip_code
+    );
+    '''
+    with open(csvfile) as fp:
+        reader = csv.reader(fp)
+        columns = [col.lower().replace(' ', '_') for col in next(reader)]
+        for row in csv.reader():
+            data = {col: val for col, val in zip(columns, row)}
+            if data['school_code'] == '0000000':  #: placeholder for district only
+                continue
+            connection.execute(insert, data)
+            
+            
 
 
 def main():

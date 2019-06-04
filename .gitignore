@@ -5,3 +5,4 @@ notes.ipynb
 images/
 data*
 .vscode/
+__pycache__/

@@ -1,10 +1,12 @@
 import collections
 import logging
 import sqlite3
-from pathlib import Path
 
+import pkg_resources
 import requests
 from bs4 import BeautifulSoup
+
+from eduscores import database
 
 
 def get_soup(zipcode):
@@ -33,45 +35,14 @@ def get_data(zipcode):
     data['latitude'] = latitude
     data['longitude'] = longitude
     return data
-
-
-def get_connection():
-    db_file = Path().cwd() / 'data' / 'eduscore.db'
-    conn = sqlite3.connect(db_file)
-    return conn
-
-
-def create_table(connection):
-    statement = '''
-    CREATE TABLE IF NOT EXISTS zipcode
-    (
-        zipcode TEXT PRIMARY KEY  -- zipcodes can start with 0 so not INTEGER
-        , post_office_city TEXT
-        , county TEXT
-        , timezone TEXT
-        , area_code INTEGER
-        , latitude REAL
-        , longitude REAL
-        , population INTEGER
-        , land_area REAL
-        , water_area REAL
-        , housing_units INTEGER
-        , occupied_housing_units INTEGER
-        , median_home_value REAL
-        , median_household_income REAL
-        
-    );
-    '''
-    connection.execute(statement)
-    return
     
 
 def insert_sql(zipcode, connection):
     data = get_data(zipcode)
-    statement = '''
+    insert = '''
     INSERT INTO zipcode
     (
-        zipcode
+        zip_code
         , post_office_city
         , county
         , timezone
@@ -88,7 +59,7 @@ def insert_sql(zipcode, connection):
     )
     VALUES 
     (
-        :zipcode
+        :zip_code
         , :post_office_city
         , :county
         , :timezone
@@ -104,14 +75,15 @@ def insert_sql(zipcode, connection):
         , :median_household_income
     );
     '''
-    connection.execute(statement, data)
+    connection.execute(insert, data)
     return
 
 
 def main():
-    conn = get_connection()
-    create_table(conn)
+    conn = database.get_connection()
+    database.create_zipcode_table(conn)
     zipcodes = conn.execute('SELECT DISTINCT zipcode FROM entity')
+    # zipcodes = [95408, 95488]  # first zipcode lacks most info tables
     for zipcode in zipcodes:
         try:
             insert_sql(zipcode, conn)
@@ -122,4 +94,8 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    # main()
+    import pathlib
+    dne = pathlib.Path(pkg_resources.resource_filename(__package__, 'dne'))
+    print(dne)
+

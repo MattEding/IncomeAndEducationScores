@@ -1,6 +1,7 @@
 beautifulsoup4
 numpy
 pandas
+pkg_resources
 requests
 scikit-learn
 seaborn

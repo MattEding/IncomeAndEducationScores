@@ -259,6 +259,7 @@ def main(years, loglevel='WARNING'):
         insert_subgroup(conn)
         insert_test(conn)
         insert_type(conn)
+        insert_cds(conn)
 
         for csv_file in CSV_DIR.iterdir():
             if not any(str(year) in csv_file.name for year in years):

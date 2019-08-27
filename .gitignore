@@ -1,6 +1,11 @@
+__pycache__/
 .ipynb_checkpoints/
-data/
-notes.ipynb
-*.log
-images/
+.vscode/
 
+*.db
+*.csv
+*.json
+*.log
+*.pkl
+*.txt
+*.zip

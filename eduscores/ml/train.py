@@ -23,7 +23,7 @@ with resources.path('eduscores.data', '') as path:
 
 def load_data(test_size=0.2):
     df = pd.read_pickle(PKL_DIR / 'eduscore.pkl').dropna()
-    # drop columns with no inherent meaning
+    #: drop columns with no inherent meaning
     X = df.drop(columns=[TARGET, 'cds_id', 'zipcode'])
     y = np.log(df[TARGET])
     return train_test_split(X, y, test_size=test_size, random_state=0)

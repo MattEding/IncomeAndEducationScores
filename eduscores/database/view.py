@@ -42,7 +42,7 @@ def create_ethnicity_pct_view(connection):
             SELECT *
             FROM Sbac
             WHERE grade = 13 AND school_code != 0
-            AND caaspp_reported_enrollment != '*'
+            AND caaspp_reported_enrollment IS NOT NULL
         )
         JOIN Subgroup USING (subgroup_id)
         JOIN Cds USING (county_code, district_code, school_code)
@@ -95,15 +95,6 @@ def create_gender_econ_view(connection):
         SELECT DISTINCT cds_id
         FROM AllGrades
     )
-    JOIN
-    (
-        SELECT
-            total_tested_at_entity_level
-            , total_tested_with_scores
-            , caaspp_reported_enrollment
-            , students_tested
-        FROM AllGrades
-    ) USING (cds_id)
     '''
 
     test_map = dict(ela=1, math=2)
@@ -114,7 +105,8 @@ def create_gender_econ_view(connection):
         JOIN
         (
             SELECT
-                pct_exceeded AS pct_exceeded_{t}_{sg}
+                cds_id,
+                , pct_exceeded AS pct_exceeded_{t}_{sg}
                 , pct_met AS pct_met_{t}_{sg}
                 , pct_nearly_met AS pct_nearly_met_{t}_{sg}
                 , pct_not_met AS pct_not_met_{t}_{sg}

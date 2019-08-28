@@ -42,11 +42,12 @@ def insert_entity(csv_file, connection):
     '''
     with open(csv_file, encoding='latin1') as fp:
         reader = csv.reader(fp)
-        columns = [col.lower().replace(' ', '_') for col in next(reader)]
+        headers = [head.lower().replace(' ', '_') for head in next(reader)]
 
+        null_map = {'': None, '*': None}
         with connection:
             for row in reader:
-                data = {col: val for col, val in zip(columns, row)}
+                data = {header: null_map.get(value, value) for header, value in zip(headers, row)}
 
                 try:
                     connection.execute(insert, data)
@@ -134,9 +135,10 @@ def insert_sbac(csv_file, connection):
                 area_num_prefix = header[:7]
                 headers[idx] = area_num_prefix + 'percentage_near_standard'
 
+        null_map = {'': None, '*': None}
         with connection:
             for row in reader:
-                data = {header: value for header, value in zip(headers, row)}
+                data = {header: null_map.get(value, value) for header, value in zip(headers, row)}
 
                 try:
                     connection.execute(insert, data)

@@ -1,3 +1,9 @@
+SELECT DISTINCT test_type
+FROM Sbac;
+-- only test_type is 'B'
+
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+
 SELECT 
     grade
     , COUNT(*)
@@ -26,7 +32,7 @@ WITH AllStudents AS
         SELECT *
         FROM Sbac
         WHERE grade = 13 AND school_code != 0
-        AND caaspp_reported_enrollment != '*'
+        AND caaspp_reported_enrollment IS NOT NULL
     )
     JOIN Subgroup USING (subgroup_id)
     JOIN Cds USING (county_code, district_code, school_code)
@@ -50,25 +56,28 @@ FROM AllGrades
 JOIN AllStudents USING (cds_id)
 JOIN Subgroup USING (subgroup_id)
 GROUP BY cds_id, subgroup_id
-HAVING description = 'Ethnicity'
+HAVING 
+    description = 'Ethnicity'
+    AND caaspp_reported_enrollment IS NOT NULL
 -- note: subgroup percents don't total to 100%;
 --       see next query for example why
 
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
-select 
+SELECT 
     cds_id
     , grade
     , avg(caaspp_reported_enrollment) AS test_avg_enrollment
     , subgroup
-from sbac 
-join cds using (county_code, district_code, school_code) 
-join subgroup using (subgroup_id)
-group by cds_id, grade, subgroup_id
-having
+FROM sbac 
+JOIN cds USING (county_code, district_code, school_code) 
+JOIN subgroup USING (subgroup_id)
+GROUP BY cds_id, grade, subgroup_id
+HAVING
     description in ('Ethnicity', 'All Students')
-    and cds_id = 120
-order by grade, subgroup_id;
+    AND caaspp_reported_enrollment IS NOT NULL
+    AND cds_id = 120
+ORDER BY grade, subgroup_id;
 -- note: subgroup by enthnicty totals don't sum to all student 
 --       total probably due to groups of 10 students or less 
 --       omitted to preserve confidentiality

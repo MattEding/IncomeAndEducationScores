@@ -19,6 +19,5 @@ def main():
     JOIN gender_econ USING (cds_id)
     '''
     
-    #TODO: replace '*' and '' with NULL when inserting into database
-    df = pd.read_sql(query, conn).replace('*', 0)
+    df = pd.read_sql(query, conn)
     df.to_pickle(PKL_FILE)

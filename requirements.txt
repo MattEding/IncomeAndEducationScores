@@ -3,4 +3,3 @@ numpy
 pandas
 requests
 scikit-learn
-seaborn
